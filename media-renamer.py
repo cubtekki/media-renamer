@@ -16,8 +16,11 @@ Step by step psuedo-code:
 """
 
 """ 
-1. Rename all files in root dir appropriately
-2. Check if nested dirs exist in file
+New step-by-step:
+- Move files to root level if only 1 file is present in directory
+- Move files from nested sub-dirs if file matches original match
+- Rename all files in root dir appropriately
+- Apply root level names to sub-dir file names according to type
 """
 #import necessary modules re and Path
 import re
@@ -27,12 +30,14 @@ import time
 start_T = time.time()
 
 #create regular expression to match expected movie name format
-movie_regex = r"(?P<title>(\w+[- .]*)+)(?P<year>\(?(19|20)\d{2}\)?)"
-tv_regex = r"(?P<title>(\w+[- .]*)+)(?P<season>[sS]\d+[eE]\d+)"
+movie_regex = r"(?P<title>(\w+[- .]*)+)(?P<year>\(?(19|20)\d{2}\)?){1}"
+tv_regex = r"(?P<title>(\w+[- .]*)+)(?P<season>[sS]\d{2}[eE]\d{2})"
+season_regex = r"season\d\d"
 
 #compile movie_regex and tv_regex
 movie_RE = re.compile(movie_regex)
 tv_RE = re.compile(tv_regex)
+season_RE = re.compile(season_regex, re.I)
 
 #expected extensions stored in tuples
 subs = '.ass', '.srt', '.sub'
@@ -50,8 +55,9 @@ final_strings = []
 #START OF FUNCTION DEFINITIONS***************************
 
 #renaming function using RE on path object names
-def rename(path_obj, re_type):
-    match = re_type.match(path_obj.name)
+def rename(path_obj):
+    print(path_obj, 'will be renamed')
+    """ match = re_type.match(path_obj.name)
     tempStr = match.group('title')
     raw_strings.append(tempStr)
     #loop through list and fix filenames
@@ -72,33 +78,52 @@ def rename(path_obj, re_type):
                     pass
                 elif sub_file.suffix in subs:
                     #add .en before suffix
-                    pass
+                    pass """
 
 #moveout function moves files to parent directory and removes the old directory.
 def moveout(path_obj):
-    for item in path_obj:
-        new_path = item.parent.joinpath(item)
-        item.rename(new_path)
-    path_obj.rmdir()
+    print(path_obj, 'will be moved out')
+    # for item in path_obj:
+    #     new_path = item.parent.joinpath(item)
+    #     item.rename(new_path)
+    # path_obj.rmdir()
 
 #START OF FUNCTION CALLS*******************************
 #initial function calls the others
 def start():
-    #rename every root level file/folder if necessary
-    for item in p.iterdir():
-        rename(item, movie_RE)
-
     #go through all files and directories apply moveout() function when needed
+    print("Number of files:", len([x for x in p.iterdir()]))
     for item in p.iterdir():
         if item.is_dir():
-            file_counter = 0
-            #count number of files/folders in directory
-            for i in item.iterdir():
-                file_counter += 1
-                if i.is_dir():
-                    moveout(i)
+            #store number of files/folders in directory
+            file_num = len([x for x in item.iterdir()])
+            #if only 1 file move it out immediately
+            if file_num == 1:
+                for i in item.iterdir():
+                    if i.is_file():
+                        moveout(i)
+                        #remove parent folder after moving out only file
+                        pass
+            #if there is more than 1 file then determine if the files are tv episodes or subtitles
+            else:
+                print(i.name, 'will not be moved')
+                for i in item.iterdir():
+                    #if there's a directory that doesn't include season in its name
+                    if i.is_dir() and not season_RE.search(i.name):
+                        subfiles = [x.name for x in i.iterdir()]
+                        #print(subfiles)
+                        tv_files = list(filter(season_RE.search, subfiles))
+                        if tv_files:
+                            continue
+                        #move files w/subtitle file extensions to the parent directory
+                        else:
+                            for sub_file in i.iterdir():
+                                if sub_file.suffix in subs:
+                                    moveout(sub_file)
+
 #function for testing what works
 def test01():
+    print("Number of files:", len([x for x in p.iterdir()]))
     for filename in p.iterdir():
         match = movie_RE.match(filename.name)
         year = match.group('year')
@@ -108,9 +133,9 @@ def test01():
         tempStr = match.group('title') + year
         # else:
         #     tempStr = match.group('title')
-        print(title)
-        print(year)
-        print(tempStr)
+        # print(title)
+        # print(year)
+        # print(tempStr)
         raw_strings.append(tempStr)
         #loop through list and fix filenames
     for item in raw_strings:
@@ -118,11 +143,12 @@ def test01():
         final_strings.append(cleaned)
     # for item in p.iterdir():
     #     print(item.name)
-test01()
+#test01()
+start()
 #print(raw_strings)
 print(final_strings)
 
 #calculate time program took to execute and print to console
 end_T = time.time()
 elapsed_time = round((end_T - start_T), 4)
-print(f"Time elapsed: {elapsed_time}secs")
+print(f"Time elapsed: {elapsed_time}s")
