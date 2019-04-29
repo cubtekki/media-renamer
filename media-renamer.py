@@ -14,33 +14,45 @@ Step by step psuedo-code:
 4.If no subtitle files are present in a dir, move media file to the root of the main dir so the file isn't in another sub-folder.
 5.Delete empty folders.
 """
+
+""" 
+1. Rename all files in root dir appropriately
+2. Check if nested dirs exist in file
+"""
 #import necessary modules re and Path
 import re
 from pathlib import Path
+import time
 
-#create regular expression to match expected movie name format 
-movie_regex = r"(?P<title>[-0-9a-zA-Z]+[ .]*)+(?P<year>[(]?[19-20]\d{2}[)]?)"
-#tv_regex = r""
-#compile movie_regex
+start_T = time.time()
+
+#create regular expression to match expected movie name format
+movie_regex = r"(?P<title>(\w+[- .]*)+)(?P<year>\(?(19|20)\d{2}\)?)"
+tv_regex = r"(?P<title>(\w+[- .]*)+)(?P<season>[sS]\d+[eE]\d+)"
+
+#compile movie_regex and tv_regex
 movie_RE = re.compile(movie_regex)
-#tv_RE = re.compile(tv_regex)
+tv_RE = re.compile(tv_regex)
 
 #expected extensions stored in tuples
 subs = '.ass', '.srt', '.sub'
 video = '.m4v', '.avi', '.mkv', '.mp4'
 
-#set p to the path of the current directory
-p = Path('.')
+#set p to the path of the directory where files are located
+#p = Path("00_testing")
+#temp path
+p = Path(r"G:\00_mediaServerFiles\zz_tempRenaming\00_testing")
 
-#List to store all modified title strings
+#empty lists to store all original and modified title strings
 raw_strings = []
 final_strings = []
 
-#START OF FUNCTION DEFINITIONS*******
+#START OF FUNCTION DEFINITIONS***************************
+
 #renaming function using RE on path object names
 def rename(path_obj, re_type):
     match = re_type.match(path_obj.name)
-    tempStr = match[0]
+    tempStr = match.group('title')
     raw_strings.append(tempStr)
     #loop through list and fix filenames
     for item in raw_strings:
@@ -69,20 +81,48 @@ def moveout(path_obj):
         item.rename(new_path)
     path_obj.rmdir()
 
-#START OF FUNCTION CALLS*****
-#rename every root level file/folder
-for item in p.iterdir():
-    rename(item, movie_RE)
+#START OF FUNCTION CALLS*******************************
+#initial function calls the others
+def start():
+    #rename every root level file/folder if necessary
+    for item in p.iterdir():
+        rename(item, movie_RE)
 
-#go through all files and directories apply moveout() function when needed
-for item in p.iterdir():
-    if item.is_dir():
-        file_counter = 0
-        #count number of files/folders in directory
-        for i in item.iterdir():
-            file_counter += 1
-            if i.is_dir():
-                moveout(i)
-
-print(raw_strings)
+    #go through all files and directories apply moveout() function when needed
+    for item in p.iterdir():
+        if item.is_dir():
+            file_counter = 0
+            #count number of files/folders in directory
+            for i in item.iterdir():
+                file_counter += 1
+                if i.is_dir():
+                    moveout(i)
+#function for testing what works
+def test01():
+    for filename in p.iterdir():
+        match = movie_RE.match(filename.name)
+        year = match.group('year')
+        title = match.group('title')
+        if '(' and ')' not in year:
+            year = "(" + year + ")"
+        tempStr = match.group('title') + year
+        # else:
+        #     tempStr = match.group('title')
+        print(title)
+        print(year)
+        print(tempStr)
+        raw_strings.append(tempStr)
+        #loop through list and fix filenames
+    for item in raw_strings:
+        cleaned = item.replace('.', ' ')
+        final_strings.append(cleaned)
+    # for item in p.iterdir():
+    #     print(item.name)
+test01()
+#print(raw_strings)
 print(final_strings)
+
+#calculate time program took to execute and print to console
+end_T = time.time()
+elapsed_time = round((end_T - start_T), 4)
+print(f"Time elapsed: {elapsed_time}secs")
