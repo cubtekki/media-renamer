@@ -77,6 +77,11 @@ def rename():
     for f in p.iterdir():
         if counter < len(final_strings):
             if f.is_dir():
+                for item in f.iterdir():
+                    if item.suffix in video:
+                        item.rename(item.parent.joinpath(final_strings[counter] + item.suffix))
+                    elif item.suffix in subs:
+                        item.rename(item.parent.joinpath(final_strings[counter] + ".eng" + item.suffix))
                 f.rename(f.parent.joinpath(final_strings[counter]))
             elif f.is_file():
                 f.rename(f.parent.joinpath(final_strings[counter] + f.suffix))
