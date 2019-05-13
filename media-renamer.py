@@ -1,28 +1,17 @@
 #This program organizes your files and renames them according to my preferred media library naming conventions.
 
-#TMDB api key = 8a1f98648f69ed38fc3b24187574cd73
-
 #Example of video file and accompanying subtitle file
 #The Departed (2006).mp4
 #The Departed (2006).en.srt
 
 """ 
-Step by step psuedo-code:
-1.Move all files to root of folder, at maximum there will be files one dir deep from script location.
-2.look at file name, remove excess characters, append date to end of filename in parentheses.
-3.If subtitle file exists then give it the same name as the media file except needs extra .en suffix.
-4.If no subtitle files are present in a dir, move media file to the root of the main dir so the file isn't in another sub-folder.
-5.Delete empty folders.
-"""
-
-""" 
-New step-by-step:
+steps:
 - Move files to root level if only 1 file is present in directory
 - Move subtitle files from nested sub-dirs
 - Rename all files in root dir using desired format
 - Apply root level names to sub-dir file names according to type
 """
-#import necessary modules re and Path
+#import modules re, Path and time
 import re
 from pathlib import Path
 import time
@@ -30,7 +19,7 @@ import time
 start_T = time.time()
 
 #create regular expression to match expected movie name format
-movie_regex = r"(?P<title>(\w+[-. ]*)+)(?P<year>\(?(?:19|20)\d{2}\)?)"
+movie_regex = r"(?P<title>(\w+[-. ]*)+)(?P<year>\(*?(?:19|20)\d{2}\)*?)"
 # tv_regex = r"(?P<title>(\w+[- .]*)+)(?P<season>[sS]\d{2}[eE]\d{2})"
 season_regex = r"season\s?\d{,2}"
 #compile movie_regex, tv_regex, and season_regex
