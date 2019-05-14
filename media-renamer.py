@@ -25,11 +25,8 @@ season_RE = re.compile(season_regex, re.I)
 subs = '.ass', '.srt', '.sub'
 video = '.m4v', '.avi', '.mkv', '.mp4'
 
-# set p to the path of the directory where files are located
-# windows path
-p = Path(r"D:\Dropbox\01_schoolThumbDrive\cs231_advPython\final_project\00_testing")
-# linux path
-# p = Path(r"/home/jacob/Dropbox/01_schoolThumbDrive/cs231_advPython/final_project/00_testing")
+# set p to the location/path where files to be modified are located
+p = PurePath(r"<your path here>")
 
 # START OF FUNCTION DEFINITIONS***************************
 
@@ -40,8 +37,8 @@ def renameSingle(path_obj):
     print(mov_match)
     # if there is a movie match format final string from match groups
     if mov_match:
-        year = mov_match.group('year')
         title = mov_match.group('title')
+        year = mov_match.group('year')
         if year:
             if '(' and ')' not in year:
                 year = f"({year})"
@@ -74,7 +71,7 @@ def renameMulti(path_obj, season):
                 fileSeason = tv_match.group('season')
                 finalStr = fileTitle + fileSeason
                 finalStr = finalStr.replace('.', ' ')
-                print(finalStr)
+                # print(finalStr)
                 i.rename(i.parent.joinpath(finalStr + i.suffix))
         # rename show's parent directory "Season xx" once all contents are renamed
         path_obj.rename(path_obj.parent.joinpath("Season " + season.group('season')))
@@ -82,8 +79,9 @@ def renameMulti(path_obj, season):
     elif not season:
         # format movie name based on match returned
         mov_match = movie_RE.match(path_obj.name)
-        year = mov_match.group('year')
         title = mov_match.group('title')
+        year = mov_match.group('year')
+        print(mov_match)
         if year:
             if '(' and ')' not in year:
                 year = f"({year})"
@@ -91,7 +89,7 @@ def renameMulti(path_obj, season):
         elif not year:
             finalStr = title
         finalStr = finalStr.replace('.', ' ')
-        print(finalStr)
+        # print(finalStr)
         for i in path_obj.iterdir():
             # move subtitles out of subdirectories
             if i.is_dir():
@@ -101,7 +99,7 @@ def renameMulti(path_obj, season):
                         moveout(sub_file)
                 # remove subtitle dir once all files are moved out
                 i.rmdir()
-            # renaming movies
+                # renaming movies
             elif i.suffix in video:
                 i.rename(i.parent.joinpath(finalStr + i.suffix))
             # renaming subtitle files
@@ -118,7 +116,7 @@ def moveout(path_obj):
 #calls moveout() and rename() as needed
 def start():
     # print number of files initially
-    print("Number of files:", len([x for x in p.iterdir()]))
+    print(len([x for x in p.iterdir()]),"files being processed at", start_T)
     # start iterating though main directory where all directories and files reside
     for item in p.iterdir():
         if item.is_dir():
