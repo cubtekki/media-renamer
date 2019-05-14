@@ -13,8 +13,8 @@ import time
 start_T = time.time()
 
 # create regular expression to match expected movie name format
-movie_regex = r"(?P<title>(\w+[-. ]*)+)(?P<year>\(?(?:19|20)\d{2}\)?)"
-tv_regex = r"(?P<show>(\w+[- .]*)+)(?P<season>[sS]\d{2}[eE]\d{2})"
+movie_regex = r"(?P<title>(\w+[ .-]*)+)(?P<year>\(?(?:19|20)\d{2}\)?)"
+tv_regex = r"(?P<show>(\w+[ .-]*)+)(?P<season>[sS]\d{2}[eE]\d{2})"
 season_regex = r"(?:season|s)\s?(?P<season>\d{1,2})"
 # compile movie_regex, tv_regex, and season_regex
 movie_RE = re.compile(movie_regex)
@@ -27,9 +27,9 @@ video = '.m4v', '.avi', '.mkv', '.mp4'
 
 # set p to the path of the directory where files are located
 # windows path
-# p = Path(r"D:\Dropbox\01_schoolThumbDrive\cs231_advPython\final_project\00_testing")
+p = Path(r"D:\Dropbox\01_schoolThumbDrive\cs231_advPython\final_project\00_testing")
 # linux path
-p = Path(r"/home/jacob/Dropbox/01_schoolThumbDrive/cs231_advPython/final_project/00_testing")
+# p = Path(r"/home/jacob/Dropbox/01_schoolThumbDrive/cs231_advPython/final_project/00_testing")
 
 # START OF FUNCTION DEFINITIONS***************************
 
