@@ -6,11 +6,12 @@
 
 # import modules re, Path and time
 import re
-from pathlib import Path
+from pathlib import PurePath, Path
 import time
 
 # record time program starts
 start_T = time.time()
+localtime = time.asctime(time.localtime(start_T))
 
 # create regular expression to match expected movie name format
 movie_regex = r"(?P<title>(\w+[ .-]*)+)(?P<year>\(?(?:19|20)\d{2}\)?)"
@@ -26,7 +27,7 @@ subs = '.ass', '.srt', '.sub'
 video = '.m4v', '.avi', '.mkv', '.mp4'
 
 # set p to the location/path where files to be modified are located
-p = PurePath(r"<your path here>")
+p = Path(<your path here>)
 
 # START OF FUNCTION DEFINITIONS***************************
 
@@ -116,10 +117,13 @@ def moveout(path_obj):
 #calls moveout() and rename() as needed
 def start():
     # print number of files initially
-    print(len([x for x in p.iterdir()]),"files being processed at", start_T)
+    print(len([x for x in p.iterdir()]),"files being processed on", localtime)
     # start iterating though main directory where all directories and files reside
     for item in p.iterdir():
-        if item.is_dir():
+        if item.suffix == ".py":
+            print(item)
+            continue
+        elif item.is_dir():
             # store count of files/folders in directory
             file_num = len([x for x in item.iterdir()])
             # check if the folder looks like a season
@@ -145,3 +149,4 @@ start()
 end_T = time.time()
 elapsed_time = round((end_T - start_T), 4)
 print(f"Time elapsed: {elapsed_time}s")
+input('Press ENTER to exit')
