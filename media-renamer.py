@@ -27,9 +27,9 @@ video = '.m4v', '.avi', '.mkv', '.mp4'
 
 # set p to the path of the directory where files are located
 # windows path
-p = Path(r"D:\Dropbox\01_schoolThumbDrive\cs231_advPython\final_project\00_testing")
+# p = Path(r"D:\Dropbox\01_schoolThumbDrive\cs231_advPython\final_project\00_testing")
 # linux path
-# p = Path(r"")
+p = Path(r"/home/jacob/Dropbox/01_schoolThumbDrive/cs231_advPython/final_project/00_testing")
 
 # START OF FUNCTION DEFINITIONS***************************
 
