@@ -1,9 +1,3 @@
-# This program organizes movie and tv-show files and renames them according to the Plex preferred media library naming conventions.
-
-# Example of video file and accompanying subtitle file
-# The Departed (2006).mp4
-# The Departed (2006).eng.srt
-
 # import modules re, Path and time
 import re
 from pathlib import PurePath, Path
@@ -12,6 +6,9 @@ import time
 # record time program starts
 start_T = time.time()
 localtime = time.asctime(time.localtime(start_T))
+
+"""set p to the location/path where files to be modified are located"""
+p = Path(<YOUR PATH HERE>)
 
 # create regular expression to match expected movie name format
 movie_regex = r"(?P<title>(\w[ &.-]*?)+)(?P<year>\(?(?:19|20)\d{2}\)?)"
@@ -26,18 +23,16 @@ season_RE = re.compile(season_regex, re.I)
 subs = '.ass', '.srt', '.sub'
 video = '.m4v', '.avi', '.mkv', '.mp4'
 
-# set p to the location/path where files to be modified are located
-p = Path(<your path here>)
-
 # START OF FUNCTION DEFINITIONS***************************
 
 # if only 1 file is being modified do this...
 def renameSingle(path_obj):
-    # check match for movie regex
+    # check match for movie/tv regex
     mov_match = movie_RE.match(path_obj.name)
-    print(mov_match)
+    tv_match = tv_RE.match(path_obj.name)
     # if there is a movie match format final string from match groups
     if mov_match:
+        print(mov_match)
         title = mov_match.group('title')
         year = mov_match.group('year')
         if year:
@@ -47,14 +42,13 @@ def renameSingle(path_obj):
         else:
             finalStr = title
     # if not a movie match assume it's a tv show and format
-    elif not mov_match:
-        tv_match = tv_RE.match(path_obj.name)
+    elif tv_match:
         print(tv_match)
         show = tv_match.group('show')
         season = tv_match.group('season')
         finalStr = show + season
-    # remove unwanted symbols from name
-    finalStr = finalStr.replace('.', ' ')
+    # remove unwanted symbols from name and convert to lower-case
+    finalStr = finalStr.replace('.', ' ').lower()
     # rename file and return new name for moveout function to use
     path_obj.rename(path_obj.parent.joinpath(finalStr + path_obj.suffix))
     return path_obj.parent.joinpath(finalStr + path_obj.suffix)
@@ -71,25 +65,26 @@ def renameMulti(path_obj, season):
                 fileTitle = tv_match.group('show')
                 fileSeason = tv_match.group('season')
                 finalStr = fileTitle + fileSeason
-                finalStr = finalStr.replace('.', ' ')
+                # replace . with space and make all lower-case
+                finalStr = finalStr.replace('.', ' ').lower()
                 # print(finalStr)
                 i.rename(i.parent.joinpath(finalStr + i.suffix))
-        # rename show's parent directory "Season xx" once all contents are renamed
-        path_obj.rename(path_obj.parent.joinpath("Season " + season.group('season')))
+        # rename show's parent directory "Season xx" once all contents are renamed -- pad with 1 zero on left
+        path_obj.rename(path_obj.parent.joinpath(fileTitle.lower() + "season " + season.group('season').zfill(2)))
     # if the parent directory doesn't include the season identifying features assume files are movie and subs
     elif not season:
         # format movie name based on match returned
         mov_match = movie_RE.match(path_obj.name)
+        print(mov_match)
         title = mov_match.group('title')
         year = mov_match.group('year')
-        print(mov_match)
         if year:
             if '(' and ')' not in year:
                 year = f"({year})"
             finalStr = title + year
         elif not year:
             finalStr = title
-        finalStr = finalStr.replace('.', ' ')
+        finalStr = finalStr.replace('.', ' ').lower()
         # print(finalStr)
         for i in path_obj.iterdir():
             # move subtitles out of subdirectories
