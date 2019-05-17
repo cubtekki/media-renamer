@@ -10,7 +10,7 @@ Utility to rename media files (movies and tv shows) in a standardized format so 
 2. Currently subtitles nested two directories deep are moved to the same level as the media file and not renamed. *I plan on adding that functionality in a future update.*
    - Additionally subtitle renaming for tv-shows is not functioning yet.
 3. When done renaming all files you will be asked to press enter. This is designed so users can observe the progress/matches. If the python window closes immediately then you know an error has occured.
-4. Once the path is set properly all that needs to be done is either double click on the media-renamer.py file or run `python3 <path to media-renamer.py>`
+4. Once the path is set properly all that needs to be done is either double click on the *media-renamer.py* file or run `python3 <path to media-renamer.py>`
 ---
 ## Example results:
 ### Before
