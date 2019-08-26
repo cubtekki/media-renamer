@@ -11,8 +11,8 @@ localtime = time.asctime(time.localtime(start_T))
 p = Path(<YOUR PATH HERE>)
 
 # create regular expression to match expected movie name format
-movie_regex = r"(?P<title>(\w[ &.-]*?)+)(?P<year>\(?(?:19|20)\d{2}\)?)"
-tv_regex = r"(?P<show>(\w[ &.-]*?)+)(?P<season>[sS]\d{2}[eE]\d{2})"
+movie_regex = r"(?P<title>(\w[ ,'.&-]*?)+)(?P<year>\(?(?:19|20)\d{2}\)?)"
+tv_regex = r"(?P<show>(\w[ ,'.&-]*?)+)(?P<season>[sS]\d{2}[eE]\d{2})"
 season_regex = r"(?:season|s)\s?(?P<season>\d{1,2})"
 # compile movie_regex, tv_regex, and season_regex
 movie_RE = re.compile(movie_regex)
@@ -20,7 +20,7 @@ tv_RE = re.compile(tv_regex)
 season_RE = re.compile(season_regex, re.I)
 
 # expected extensions stored in tuples
-subs = '.ass', '.srt', '.sub'
+subs = '.srt', '.sub', '.idx', 'ass', '.ssa'
 video = '.m4v', '.avi', '.mkv', '.mp4'
 
 # START OF FUNCTION DEFINITIONS***************************
