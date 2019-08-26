@@ -8,7 +8,8 @@ start_T = time.time()
 localtime = time.asctime(time.localtime(start_T))
 
 """set p to the location/path where files to be modified are located"""
-p = Path(<YOUR PATH HERE>)
+#p = Path(<YOUR PATH HERE>)
+p = Path("./00_testing")
 
 # create regular expression to match expected movie name format
 movie_regex = r"(?P<title>(\w[ ,'.&-]*?)+)(?P<year>\(?(?:19|20)\d{2}\)?)"
@@ -73,6 +74,8 @@ def renameMulti(path_obj, season):
         path_obj.rename(path_obj.parent.joinpath(fileTitle.lower() + "season " + season.group('season').zfill(2)))
     # if the parent directory doesn't include the season identifying features assume files are movie and subs
     elif not season:
+        #create counter to number multiple sub files
+        count = 1
         # format movie name based on match returned
         mov_match = movie_RE.match(path_obj.name)
         print(mov_match)
@@ -100,7 +103,13 @@ def renameMulti(path_obj, season):
                 i.rename(i.parent.joinpath(finalStr + i.suffix))
             # renaming subtitle files
             elif i.suffix in subs:
-                i.rename(i.parent.joinpath(finalStr + ".eng" + i.suffix))
+                print(count)
+                try:
+                    i.rename(i.parent.joinpath(finalStr + ".eng" + i.suffix))
+                except FileExistsError:
+                    i.rename(i.parent.joinpath(finalStr + "_" + str(count) + ".eng" + i.suffix))
+                #iterate counter every time a sub is named
+                count += 1
         # rename movie parent directory finalStr without any extension
         path_obj.rename(path_obj.parent.joinpath(finalStr))
 
@@ -115,10 +124,7 @@ def start():
     print(len([x for x in p.iterdir()]),"files being processed on", localtime)
     # start iterating though main directory where all directories and files reside
     for item in p.iterdir():
-        if item.suffix == ".py":
-            print(item)
-            continue
-        elif item.is_dir():
+        if item.is_dir():
             # store count of files/folders in directory
             file_num = len([x for x in item.iterdir()])
             # check if the folder looks like a season
