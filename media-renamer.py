@@ -92,24 +92,27 @@ def renameMulti(path_obj, season):
         for i in path_obj.iterdir():
             # move subtitles out of subdirectories
             if i.is_dir():
-                #move files w/subtitle file extensions to the parent directory
+                # move files w/subtitle file extensions to the parent directory
                 for sub_file in i.iterdir():
                     if sub_file.suffix in subs:
                         moveout(sub_file)
                 # remove subtitle dir once all files are moved out
                 i.rmdir()
+                # below is not working
+                # renameMulti(i.parent, season)
                 # renaming movies
             elif i.suffix in video:
                 i.rename(i.parent.joinpath(finalStr + i.suffix))
             # renaming subtitle files
             elif i.suffix in subs:
-                print(count)
+                iterator = str(count).zfill(2)
+                # rename sub to standard format with or without number depending if filename already taken.
                 try:
                     i.rename(i.parent.joinpath(finalStr + ".eng" + i.suffix))
                 except FileExistsError:
-                    i.rename(i.parent.joinpath(finalStr + "_" + str(count) + ".eng" + i.suffix))
-                #iterate counter every time a sub is named
-                count += 1
+                    # iterate counter every time a sub is named
+                    count += 1
+                    i.rename(i.parent.joinpath(finalStr + "_" + iterator + ".eng" + i.suffix))
         # rename movie parent directory finalStr without any extension
         path_obj.rename(path_obj.parent.joinpath(finalStr))
 
@@ -140,7 +143,7 @@ def start():
             elif file_num > 1:
                 renameMulti(item, seas_match)
         # if the item is a file go straight to renaming
-        elif item.is_file():
+        elif item.is_file() and item.suffix in video:
             renameSingle(item)
 
 # start script here
