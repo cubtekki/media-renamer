@@ -1,4 +1,4 @@
-# media-renamer version 0.1
+# media-renamer version 0.2 (October 2020)
 Utility to rename media files (movies and tv shows) in a standardized format so media scanners like Plex fetch correct metadata efficiently.
 
 ---
