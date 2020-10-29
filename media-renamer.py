@@ -9,11 +9,11 @@ localtime = time.asctime(time.localtime(start_T))
 
 """set p to the location/path where files to be modified are located"""
 #p = Path(<YOUR PATH HERE>)
-p = Path("./00_testing")
+p = Path("./movies-tv")
 
 # create regular expression to match expected movie name format
-movie_regex = r"(?P<title>(\w[ ,'.&-+]*?)+)(?P<year>[[(]*(?:19|20)\d{2}[])]*)"
-tv_regex = r"(?P<show>(\w[ ,'.&-+]*?)+)(?P<season>[sS]\d{2}[eE]\d{2})"
+movie_regex = r"(?P<title>(\w[ ,'.&-+]*?)+)(?P<year>[ (\[](19|20)\d{2}[ )\]])"
+tv_regex = r"(?P<showBeg>(\w[ ,'.&-+]*?)+)?(?P<season>[sS].?\d{2}[eE]\d{2})(?P<showEnd>(.?\w[ ,'.&-+]*?)+)?"
 season_regex = r"(?:season|s)\s?(?P<season>\d{1,2})"
 # compile movie_regex, tv_regex, and season_regex
 movie_RE = re.compile(movie_regex)
@@ -29,27 +29,38 @@ video = '.m4v', '.avi', '.mkv', '.mp4'
 # if only 1 file is being modified do this...
 def renameSingle(path_obj):
     # check match for movie/tv regex
-    mov_match = movie_RE.match(path_obj.name)
-    tv_match = tv_RE.match(path_obj.name)
+    mov_match = movie_RE.match(path_obj.stem)
+    tv_match = tv_RE.match(path_obj.stem)
     # if there is a movie match format final string from match groups
     if mov_match:
-        print(mov_match, mov_match.group('title'),mov_match.group('year'))
+        print("movie match", mov_match, mov_match.group('title'),mov_match.group('year'))
         title = mov_match.group('title')
         year = mov_match.group('year')
-        year = year.strip("()[]")
         if year:
+            year = year.strip("()[]")
             year = f"({year})"
             finalStr = title + year
         else:
             finalStr = title
     # if not a movie match assume it's a tv show and format
     elif tv_match:
-        print(tv_match)
-        show = tv_match.group('show')
+        print("tv match", tv_match)
+        showBeg = tv_match.group('showBeg')
+        showEnd = tv_match.group('showEnd')
         season = tv_match.group('season')
+        print (showBeg, season, showEnd)
+        if showBeg:
+            show = showBeg
+        elif showEnd:
+            show = showEnd
+        else:
+            show = ''
         finalStr = show + season
+    else:
+        print("single file no match", path_obj.stem)
     # remove unwanted symbols from name and convert to lower-case
-    finalStr = finalStr.strip("',")
+    finalStr = finalStr.replace("'", "")
+    finalStr = finalStr.replace(",", "")
     finalStr = finalStr.replace('.', ' ').lower()
     # rename file and return new name for moveout function to use
     path_obj.rename(path_obj.parent.joinpath(finalStr + path_obj.suffix))
@@ -59,16 +70,26 @@ def renameSingle(path_obj):
 def renameMulti(path_obj, season):
     # if the files are part of a season of a show
     if season:
+        print("tv match with multi episodes")
         # loop through dir and check if the items are files and if so format name and rename file with new name
         for i in path_obj.iterdir():
             if i.is_file():
-                tv_match = tv_RE.match(i.name)
-                print(tv_match, tv_match.group('show'))
-                fileTitle = tv_match.group('show')
+                tv_match = tv_RE.match(i.stem)
+                showBeg = tv_match.group('showBeg')
+                showEnd = tv_match.group('showEnd')
                 fileSeason = tv_match.group('season')
+                if showBeg:
+                    fileTitle = showBeg
+                elif showEnd:
+                    fileTitle = showEnd
+                else:
+                    fileTitle = ''
+                print(tv_match, fileTitle)
+                # fileTitle = tv_match.group('show')
                 finalStr = fileTitle + fileSeason
                 # replace . with space, remove , and ' and make all lower-case
-                finalStr = finalStr.strip("',")
+                finalStr = finalStr.replace("'", "")
+                finalStr = finalStr.replace(",", "")
                 finalStr = finalStr.replace('.', ' ').lower()
                 # print(finalStr)
                 i.rename(i.parent.joinpath(finalStr + i.suffix))
@@ -79,8 +100,8 @@ def renameMulti(path_obj, season):
         #create counter to number multiple sub files
         count = 1
         # format movie name based on match returned
-        mov_match = movie_RE.match(path_obj.name)
-        print(mov_match, mov_match.group('title'),mov_match.group('year'))
+        mov_match = movie_RE.match(path_obj.stem)
+        print("movie match w/subs", mov_match, mov_match.group('title'),mov_match.group('year'))
         title = mov_match.group('title')
         year = mov_match.group('year')
         year = year.strip("()[]")
@@ -89,7 +110,8 @@ def renameMulti(path_obj, season):
             finalStr = title + year
         elif not year:
             finalStr = title
-        finalStr = finalStr.strip("',")
+        finalStr = finalStr.replace("'", "")
+        finalStr = finalStr.replace(",", "")
         finalStr = finalStr.replace('.', ' ').lower()
         # print(finalStr)
         for i in path_obj.iterdir():
@@ -132,9 +154,10 @@ def start():
     for item in p.iterdir():
         if item.is_dir():
             # store count of files/folders in directory
-            file_num = len([x for x in item.iterdir()])
-            # check if the folder looks like a season
-            seas_match = season_RE.search(item.name)
+            contents = [x for x in item.iterdir()]
+            file_num = len(contents)
+            # check if the directory contents looks like a show w/seasons
+            seas_match = season_RE.search(str(contents))
             # if only 1 file move it out immediately
             if file_num == 1:
                 for i in item.iterdir():
