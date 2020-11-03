@@ -12,7 +12,7 @@ localtime = time.asctime(time.localtime(start_T))
 p = Path("./movies-tv")
 
 # create regular expression to match expected movie name format
-movie_regex = r"(?P<title>(\w[ ,'.&-+]*?)+)(?P<year>[ (\[](19|20)\d{2}[ )\]])"
+movie_regex = r"(?P<title>(\w[ ,'.&-+]*?)+)(?P<year>[ (\[]?(19|20)\d{2}[ )\]]?)"
 tv_regex = r"(?P<showBeg>(\w[ ,'.&-+]*?)+)?(?P<season>[sS].?\d{2}[eE]\d{2})(?P<showEnd>(.?\w[ ,'.&-+]*?)+)?"
 season_regex = r"(?:season|s)\s?(?P<season>\d{1,2})"
 # compile movie_regex, tv_regex, and season_regex
